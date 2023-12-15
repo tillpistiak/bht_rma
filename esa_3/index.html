@@ -36,7 +36,8 @@
         var groundImg = new Image();
 
         //Callback für Ladevorgang hinzufügen
-        //...
+        creatureImg.onload = onItemLoaded;
+        groundImg.onload = onItemLoaded;
 
         //Anzahl der zu ladenen Bilder
         var numImages = 2;
@@ -60,7 +61,6 @@
 
           //Schwerkraft
           character.vy += gravity;
-
           //Kollision Boden
           if (character.y + creatureHeight / 2 >= groundY) {
             character.vy *= -1; //Abprallen
@@ -68,23 +68,24 @@
             character.y = groundY - creatureHeight / 2; //Position korrigieren
           }
 
-          /*if (... >= theCanvas.width) {    //Kollision rechte Wand
-                 ...                             //Abprallen
-                 ...                             //Elastizität anwenden
-                 ...                             //Position korrigieren
-                 }
-                 else if (... <= 0) {                 //Kollision linke Wand
-                 ...                             //Abprallen
-                 ...                             //Elastizität anwenden
-                 ...                             //Position korrigieren
-                 }*/
+          if (character.x + creatureWidth / 2 >= theCanvas.width) {
+            //Kollision rechte Wand
+            character.vx *= -1; //Abprallen
+            character.vx *= character.elasticity; //Elastizität anwenden
+            character.x = theCanvas.width - creatureWidth / 2; //Position korrigieren
+          } else if (character.x - creatureWidth / 2 <= 0) {
+            //Kollision linke Wand
+            character.vx *= -1; //Abprallen
+            character.vx *= character.elasticity; //Elastizität anwenden
+            character.x = creatureWidth / 2; //Position korrigieren
+          }
 
           //Position aktualisieren
           character.x += character.vx;
           character.y += character.vy;
 
-          //Character zeichnen
           drawCharacter();
+          //Character zeichnen
 
           //Boden zeichnen
           drawGround();
@@ -96,16 +97,14 @@
 
           //Bewegungsrichtung des Characters
           var direction = character.vx / Math.abs(character.vx);
-          //Ausrichtung des Characters über Skalierungstransformation
-          //...
-
-          //context.drawImage(creatureImg, ..., ...);
+          context.scale(direction, 1);
+          context.drawImage(creatureImg, 0, 0);
           context.restore();
         }
 
         function drawGround() {
           //Boden mit ground.png zeichnen
-          //...
+          context.drawImage(groundImg, 0, groundY);
         }
 
         function renderingLoop() {
@@ -115,9 +114,10 @@
 
         function onItemLoaded() {
           imgLoadCount++;
-          if (imgLoadCount == numImages) {
-            //Bilder geladen
-            //...
+          if (imgLoadCount === numImages) {
+            creatureHeight = creatureImg.height;
+            creatureWidth = creatureImg.width;
+            renderingLoop();
           }
         }
       }
